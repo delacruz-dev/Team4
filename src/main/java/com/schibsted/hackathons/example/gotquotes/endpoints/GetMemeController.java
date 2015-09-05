@@ -34,8 +34,7 @@ public class GetMemeController {
             HttpServerRequest<ByteBuf> request,
             HttpServerResponse<ByteBuf> response,
             @QueryParam(value = "name", defaultValue = "rick-roll", required = false) String name,
-            @QueryParam(value = "top", defaultValue = "", required = true) String top,
-            @QueryParam(value = "bottom", defaultValue = "", required = true) String bottom) {
+            @QueryParam(value = "text", defaultValue = "", required = true) String top) {
 
         String replacedName = name.replaceAll("\\s", "-");
         ClassLoader classLoader = getClass().getClassLoader();
@@ -50,7 +49,8 @@ public class GetMemeController {
                         subscriber.onError(e);
                     }
                 })
-                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
                 .map(image -> {
                     try {
                         return getBytes(top, image);
@@ -64,8 +64,7 @@ public class GetMemeController {
                     response.setStatus(HttpResponseStatus.OK);
                     response.writeBytes(imageInByte);
                     return response.close();
-                })
-                .observeOn(Schedulers.computation());
+                });
     }
     
     
@@ -96,7 +95,7 @@ public class GetMemeController {
 
     
     private int getOriginalTextCenterPoint(String text, FontRenderContext fontRenderContext, Font font) {
-        return (int) Math.round(getTextWidth(text, fontRenderContext, font) / 2);
+        return Math.round(getTextWidth(text, fontRenderContext, font) / 2);
     }
 
     
