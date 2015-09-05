@@ -14,7 +14,11 @@ import scmspain.karyon.restrouter.annotation.Endpoint;
 import scmspain.karyon.restrouter.annotation.Path;
 import scmspain.karyon.restrouter.annotation.PathParam;
 
+import javax.imageio.ImageIO;
 import javax.ws.rs.HttpMethod;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.net.URL;
 
 @Singleton
 @Endpoint
@@ -23,18 +27,22 @@ public class GetMemeController {
 
     }
 
-
-    @Path(value = "/api/meme/", method = HttpMethod.GET)
-    public Observable<Void> getQuote(HttpServerResponse<ByteBuf> response) {
-
-        JSONObject content = new JSONObject();
+    @Path(value = "/api/meme", method = HttpMethod.GET)
+    public Observable<Void> getMeme(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
         try {
-            content.put("Hello", "World");
-        } catch (JSONException e) {
+            BufferedImage originalImage= ImageIO.read(new URL("http://www.cs.cmu.edu/~chuck/lennapg/len_std.jpg"));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            ImageIO.write(originalImage, "jpg", baos);
+            byte[] imageInByte = baos.toByteArray();
+
+            response.getHeaders().add("Content-Type", "image/jpeg");
+            response.setStatus(HttpResponseStatus.OK);
+            response.writeBytes(imageInByte);
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        response.getHeaders().add("Content-Type", "application/json;charset=UTF-8");
-        response.write(content.toString(), StringTransformer.DEFAULT_INSTANCE);
+
         return response.close();
     }
 }
