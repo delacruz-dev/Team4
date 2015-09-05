@@ -15,8 +15,18 @@ import scmspain.karyon.restrouter.annotation.Endpoint;
 import scmspain.karyon.restrouter.annotation.Path;
 import scmspain.karyon.restrouter.annotation.PathParam;
 
+import javax.imageio.ImageIO;
 import javax.ws.rs.HttpMethod;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,6 +82,30 @@ public class GotQuotesController {
         response.getHeaders().add("Content-Type", "application/json;charset=UTF-8");
         response.setStatus(HttpResponseStatus.OK);
         response.write("Eureka!", StringTransformer.DEFAULT_INSTANCE);
+        return response.close();
+    }
+
+    @Path(value = "/api/meme", method = HttpMethod.GET)
+    public Observable<Void> getMeme(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
+
+
+        try {
+
+
+            BufferedImage originalImage=ImageIO.read(new URL("http://www.cs.cmu.edu/~chuck/lennapg/len_std.jpg"));
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(originalImage, "jpg", baos);
+            byte[] imageInByte = baos.toByteArray();
+
+            response.getHeaders().add("Content-Type", "image/jpeg");
+            response.setStatus(HttpResponseStatus.OK);
+            response.writeBytes(imageInByte);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return response.close();
     }
 
