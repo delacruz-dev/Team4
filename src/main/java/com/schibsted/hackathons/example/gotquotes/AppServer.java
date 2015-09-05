@@ -23,8 +23,8 @@ import scmspain.karyon.restrouter.KaryonRestRouterModule;
 @Modules(include = {
         ShutdownModule.class,
         KaryonWebAdminModule.class,
-        KaryonEurekaModule.class,
-        AppServer.KaryonRestRouterModuleImpl.class,
+//        KaryonEurekaModule.class,
+       AppServer.KaryonRestRouterModuleImpl.class,
 })
 public interface AppServer {
     class KaryonRestRouterModuleImpl extends KaryonRestRouterModule {
