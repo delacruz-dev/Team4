@@ -13,6 +13,7 @@ import rx.Observable;
 import scmspain.karyon.restrouter.annotation.Endpoint;
 import scmspain.karyon.restrouter.annotation.Path;
 import scmspain.karyon.restrouter.annotation.PathParam;
+import scmspain.karyon.restrouter.annotation.QueryParam;
 
 import javax.imageio.ImageIO;
 import javax.ws.rs.HttpMethod;
@@ -29,14 +30,17 @@ public class GetMemeController {
     }
 
     @Path(value = "/api/meme", method = HttpMethod.GET)
-    public Observable<Void> getMeme(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
+    public Observable<Void> getMeme(
+            HttpServerRequest<ByteBuf> request,
+            HttpServerResponse<ByteBuf> response,
+            @QueryParam(value = "text", defaultValue = "", required = true) String text) {
         try {
             BufferedImage originalImage= ImageIO.read(new URL("http://www.cs.cmu.edu/~chuck/lennapg/len_std.jpg"));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             Graphics g = originalImage.getGraphics();
             g.setFont(g.getFont().deriveFont(30f));
-            g.drawString("Hello World!", 100, 100);
+            g.drawString(text, 100, 100);
             g.dispose();
 
             ImageIO.write(originalImage, "jpg", baos);
