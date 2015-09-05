@@ -10,6 +10,7 @@ import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 import scmspain.karyon.restrouter.annotation.Endpoint;
 import scmspain.karyon.restrouter.annotation.Path;
 import scmspain.karyon.restrouter.annotation.PathParam;
@@ -20,6 +21,7 @@ import javax.ws.rs.HttpMethod;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URL;
 
 @Singleton
@@ -28,34 +30,50 @@ public class GetMemeController {
     public GetMemeController() {
 
     }
-
+    
     @Path(value = "/api/meme", method = HttpMethod.GET)
     public Observable<Void> getMeme(
             HttpServerRequest<ByteBuf> request,
             HttpServerResponse<ByteBuf> response,
             @QueryParam(value = "top", defaultValue = "", required = true) String top,
             @QueryParam(value = "bottom", defaultValue = "", required = true) String bottom) {
-        try {
-            BufferedImage originalImage= ImageIO.read(new URL("http://www.cs.cmu.edu/~chuck/lennapg/len_std.jpg"));
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-            Graphics g = originalImage.getGraphics();
-            Font font = new Font("IMPACT", Font.BOLD, 36);
-            g.setFont(font);
-            g.drawString(top.toUpperCase(), 0, 50);
-            g.drawString(bottom.toUpperCase(), 0, 230);
-            g.dispose();
+        return Observable
+                .<BufferedImage>create(subscriber -> {
+                    try {
+                        subscriber.onNext(ImageIO.read(new URL("http://www.cs.cmu.edu/~chuck/lennapg/len_std.jpg")));
+                        subscriber.onCompleted();
+                    } catch (IOException e) {
+                        subscriber.onError(e);
+                    }
+                })
+                .observeOn(Schedulers.io())
+                .map(image -> {
+                    try {
+                        return writeTextOnImage(image, top, bottom);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .map(ByteArrayOutputStream::toByteArray)
+                .flatMap(imageInByte -> {
+                    response.getHeaders().add("Content-Type", "image/jpeg");
+                    response.setStatus(HttpResponseStatus.OK);
+                    response.writeBytes(imageInByte);
+                    return response.close();
+                })
+                .observeOn(Schedulers.computation());
+    }
 
-            ImageIO.write(originalImage, "jpg", baos);
-            byte[] imageInByte = baos.toByteArray();
-
-            response.getHeaders().add("Content-Type", "image/jpeg");
-            response.setStatus(HttpResponseStatus.OK);
-            response.writeBytes(imageInByte);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return response.close();
+    private ByteArrayOutputStream writeTextOnImage(BufferedImage originalImage, String top, String bottom) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Graphics g = originalImage.getGraphics();
+        Font font = new Font("IMPACT", Font.BOLD, 36);
+        g.setFont(font);
+        g.drawString(top.toUpperCase(), 0, 50);
+        g.drawString(bottom.toUpperCase(), 0, 230);
+        g.dispose();
+        ImageIO.write(originalImage, "jpg", baos);
+        return baos;
     }
 }
