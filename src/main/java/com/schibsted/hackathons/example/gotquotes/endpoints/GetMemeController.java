@@ -16,6 +16,7 @@ import scmspain.karyon.restrouter.annotation.PathParam;
 
 import javax.imageio.ImageIO;
 import javax.ws.rs.HttpMethod;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
@@ -32,6 +33,11 @@ public class GetMemeController {
         try {
             BufferedImage originalImage= ImageIO.read(new URL("http://www.cs.cmu.edu/~chuck/lennapg/len_std.jpg"));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            Graphics g = originalImage.getGraphics();
+            g.setFont(g.getFont().deriveFont(30f));
+            g.drawString("Hello World!", 100, 100);
+            g.dispose();
 
             ImageIO.write(originalImage, "jpg", baos);
             byte[] imageInByte = baos.toByteArray();
