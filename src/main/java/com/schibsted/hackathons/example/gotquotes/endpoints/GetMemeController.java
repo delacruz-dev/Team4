@@ -33,7 +33,7 @@ public class GetMemeController {
     public Observable<Void> getMeme(
             HttpServerRequest<ByteBuf> request,
             HttpServerResponse<ByteBuf> response,
-            @QueryParam(value = "name", defaultValue = "", required = true) String name,
+            @QueryParam(value = "name", defaultValue = "rick-roll", required = false) String name,
             @QueryParam(value = "top", defaultValue = "", required = true) String top,
             @QueryParam(value = "bottom", defaultValue = "", required = true) String bottom) {
 
