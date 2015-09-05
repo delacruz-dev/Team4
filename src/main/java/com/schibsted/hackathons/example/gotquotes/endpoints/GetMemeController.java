@@ -33,7 +33,8 @@ public class GetMemeController {
     public Observable<Void> getMeme(
             HttpServerRequest<ByteBuf> request,
             HttpServerResponse<ByteBuf> response,
-            @QueryParam(value = "text", defaultValue = "", required = true) String text) {
+            @QueryParam(value = "top", defaultValue = "", required = true) String top,
+            @QueryParam(value = "bottom", defaultValue = "", required = true) String bottom) {
         try {
             BufferedImage originalImage= ImageIO.read(new URL("http://www.cs.cmu.edu/~chuck/lennapg/len_std.jpg"));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -41,7 +42,8 @@ public class GetMemeController {
             Graphics g = originalImage.getGraphics();
             Font font = new Font("IMPACT", Font.BOLD, 36);
             g.setFont(font);
-            g.drawString(text.toUpperCase(), 0, 100);
+            g.drawString(top.toUpperCase(), 0, 50);
+            g.drawString(bottom.toUpperCase(), 0, 230);
             g.dispose();
 
             ImageIO.write(originalImage, "jpg", baos);
