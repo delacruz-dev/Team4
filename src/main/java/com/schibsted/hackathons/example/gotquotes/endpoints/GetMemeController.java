@@ -35,13 +35,18 @@ public class GetMemeController {
     public Observable<Void> getMeme(
             HttpServerRequest<ByteBuf> request,
             HttpServerResponse<ByteBuf> response,
+            @QueryParam(value = "name", defaultValue = "", required = true) String name,
             @QueryParam(value = "top", defaultValue = "", required = true) String top,
             @QueryParam(value = "bottom", defaultValue = "", required = true) String bottom) {
+
+        String replacedName = name.replaceAll("\\s", "-");
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL url = classLoader.getResource("blank_memes/" + replacedName + ".jpg");
 
         return Observable
                 .<BufferedImage>create(subscriber -> {
                     try {
-                        subscriber.onNext(ImageIO.read(new URL("http://www.cs.cmu.edu/~chuck/lennapg/len_std.jpg")));
+                        subscriber.onNext(ImageIO.read(url));
                         subscriber.onCompleted();
                     } catch (IOException e) {
                         subscriber.onError(e);
