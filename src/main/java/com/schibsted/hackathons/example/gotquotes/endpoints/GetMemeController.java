@@ -39,8 +39,9 @@ public class GetMemeController {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             Graphics g = originalImage.getGraphics();
-            g.setFont(g.getFont().deriveFont(30f));
-            g.drawString(text, 100, 100);
+            Font font = new Font("IMPACT", Font.BOLD, 36);
+            g.setFont(font);
+            g.drawString(text.toUpperCase(), 0, 100);
             g.dispose();
 
             ImageIO.write(originalImage, "jpg", baos);
